@@ -400,23 +400,44 @@ uint8_t AHT10::getBusyBit(bool readI2C)
 */
 /**************************************************************************/
 float AHT10::calculateHeatIndex(float temperature, float humidity) {
-    // Fórmula del índice de calor
-    float hi = -42.379 
-               + 2.04901523 * temperature 
-               + 10.14333127 * humidity 
-               - 0.22475541 * temperature * humidity 
-               - 0.00683783 * pow(temperature, 2) 
-               - 0.05481717 * pow(humidity, 2) 
-               + 0.00122874 * pow(temperature, 2) * humidity 
-               + 0.00085282 * temperature * pow(humidity, 2) 
-               - 0.00000199 * pow(temperature, 2) * pow(humidity, 2);
+    float hi = 0.0;
 
-    // Ajuste para valores bajos de humedad o temperatura
-    if (humidity < 13 && (temperature >= 80.0 && temperature <= 112.0)) {
-        hi -= ((13 - humidity) / 4) * sqrt((17 - abs(temperature - 95)) / 17);
-    } else if (humidity > 85 && (temperature >= 80.0 && temperature <= 87.0)) {
-        hi += ((humidity - 85) / 10) * ((87 - temperature) / 5);
+    // Check for valid humidity range
+    if (humidity < 0 || humidity > 100) {
+        return temperature; // Return original temperature if humidity is invalid
     }
+
+    // Convert Celsius to Fahrenheit
+    float tempF = (temperature * 9.0 / 5.0) + 32.0;
+
+    if (tempF < 80.0) {
+        // Use the simplified formula for HI < 80°F
+        hi = 0.5 * (tempF + 61.0 + ((tempF - 68.0) * 1.2) + (humidity * 0.094));
+    }
+    else{
+        // Main heat index formula (NCEP)
+        hi = -42.379 
+                  + 2.04901523 * tempF 
+                  + 10.14333127 * humidity 
+                  - 0.22475541 * tempF * humidity 
+                  - 0.00683783 * pow(tempF, 2) 
+                  - 0.05481717 * pow(humidity, 2) 
+                  + 0.00122874 * pow(tempF, 2) * humidity 
+                  + 0.00085282 * tempF * pow(humidity, 2) 
+                  - 0.00000199 * pow(tempF, 2) * pow(humidity, 2);
+
+        // Adjust for low humidity
+        if (humidity < 13 && (tempF >= 80.0 && tempF <= 112.0)) {
+            hi -= ((13 - humidity) / 4) * sqrt((17 - abs(tempF - 95)) / 17);
+        }
+        // Adjust for high humidity
+        else if (humidity > 85 && (tempF >= 80.0 && tempF <= 87.0)) {
+            hi += ((humidity - 85) / 10) * ((87 - tempF) / 5);
+        }
+    }
+
+    // Convert Fahrenheit back to Celsius
+    hi = (hi - 32.0) * 5.0 / 9.0;
 
     return hi;
 }
