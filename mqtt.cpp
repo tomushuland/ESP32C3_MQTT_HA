@@ -241,7 +241,7 @@ void mqtt_reconnect(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs* sw
 }
 
 // Publish all the data to the MQTT server dynamically
-void mqtt_publish_data(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs* switchs, size_t switchs_count) {
+bool mqtt_publish_data(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs* switchs, size_t switchs_count) {
   // Confirm still connected to MQTT server
   if (!client.connected()) {
       mqtt_reconnect(sensors, sensor_count, switchs, switchs_count);
@@ -272,5 +272,7 @@ void mqtt_publish_data(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs*
 
     // Publish the payload to the MQTT broker
     client.publish((char*)mqtt_composeTopic(PUB_TOPIC).c_str(), (char*)payload.c_str(), true);
+    return true;
   }
+  return false;
 }

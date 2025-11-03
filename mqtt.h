@@ -4,11 +4,12 @@
 // #include <ESP8266WiFi.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "esp_sleep.h"
 
 // defined in pubSub MQTT_MAX_PACKET_SIZE 512
 #define MQTT_MAX_PACKET_SIZE 512
 
-const unsigned long WiFiconnectInterval = 10000; // 5 seconds
+const unsigned long WiFiconnectInterval = 30000; // 30 seconds
 
 
 
@@ -66,6 +67,6 @@ String mqtt_composeTopic(bool pub_sub_option);
 void mqtt_discovery_sensor(const char* sensor, const char* unit_of_measurement, const char* icon);
 void mqtt_discovery_switch(const char* sensor, const char* icon);
 void mqtt_reconnect(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs* switchs, size_t switchs_count);
-void mqtt_publish_data(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs* switchs, size_t switchs_count);
+bool mqtt_publish_data(mqtt_sensors* sensors, size_t sensor_count, mqtt_switchs* switchs, size_t switchs_count);
 
 #endif // MQTT_H
